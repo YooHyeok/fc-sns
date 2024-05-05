@@ -38,7 +38,8 @@ tasks.named('test') {
 }
 node {
 	nodeModulesDir = file("$projectDir/front-end")
-	version = '18.3.0'
+//	version = '18.3.0'
+	version = '20.11.1'
 	download = true
 }
 
