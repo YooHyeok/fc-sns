@@ -3,6 +3,7 @@ package com.fc.sns.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fc.sns.controller.request.UserJoinRequest;
 import com.fc.sns.controller.request.UserLoginRequest;
+import com.fc.sns.exception.ErrorCode;
 import com.fc.sns.exception.SnsApplicationException;
 import com.fc.sns.model.User;
 import com.fc.sns.service.UserService;
@@ -52,7 +53,7 @@ public class UserControllerTest {
         String userName = "userName";
         String password = "password";
 
-        Mockito.when(userService.join(userName, password)).thenThrow(new SnsApplicationException());
+        Mockito.when(userService.join(userName, password)).thenThrow(new SnsApplicationException(ErrorCode.DUPLICATED_USER_NAME));
 
         mockMvc.perform(
                         MockMvcRequestBuilders.post("/api/v1/users/join")
@@ -84,7 +85,7 @@ public class UserControllerTest {
         String userName = "userName";
         String password = "password";
 
-        Mockito.when(userService.login(userName, password)).thenThrow(new SnsApplicationException());
+        Mockito.when(userService.login(userName, password)).thenThrow(new SnsApplicationException(ErrorCode.USER_NOT_FOUND));
 
         mockMvc.perform(
                         MockMvcRequestBuilders.post("/api/v1/users/login")
@@ -100,7 +101,7 @@ public class UserControllerTest {
         String userName = "userName";
         String password = "password";
 
-        Mockito.when(userService.login(userName, password)).thenThrow(new SnsApplicationException());
+        Mockito.when(userService.login(userName, password)).thenThrow(new SnsApplicationException(ErrorCode.INVALID_PASSWORD));
 
         mockMvc.perform(
                         MockMvcRequestBuilders.post("/api/v1/users/login")
