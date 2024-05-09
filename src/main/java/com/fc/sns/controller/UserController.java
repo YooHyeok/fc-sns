@@ -4,6 +4,7 @@ import com.fc.sns.controller.request.UserJoinRequest;
 import com.fc.sns.controller.request.UserLoginRequest;
 import com.fc.sns.controller.response.Response;
 import com.fc.sns.controller.response.UserJoinReponse;
+import com.fc.sns.controller.response.UserLoginReponse;
 import com.fc.sns.model.User;
 import com.fc.sns.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +29,8 @@ public class UserController {
 
     // TODO: implement
     @PostMapping("/login")
-    public void login(@RequestBody UserLoginRequest request) {
-        userService.login(request.getUserName(), request.getPassword());
+    public Response<UserLoginReponse> login(@RequestBody UserLoginRequest request) {
+        String token = userService.login(request.getUserName(), request.getPassword());
+        return Response.success(new UserLoginReponse(token));
     }
 }
