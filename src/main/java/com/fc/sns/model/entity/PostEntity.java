@@ -47,4 +47,12 @@ public class PostEntity {
         this.updatedAt = Timestamp.from(Instant.now());
     }
 
+    public static PostEntity of(String title, String body, UserEntity userEntity) {
+        PostEntity postEntity = new PostEntity();
+        postEntity.setTitle(title);
+        postEntity.setBody(body);
+        postEntity.setUser(userEntity);
+        return postEntity;
+    }
+
 }
