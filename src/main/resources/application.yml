@@ -19,6 +19,6 @@ spring:
     driver-class-name: org.postgresql.Driver
 
 jwt:
-  seceret-key: fc.sns-application-2024.secret_key
+  secret-key: fc.sns-application-2024.secret_key
   token:
     expired-time-ms: 2592000000 #30일 - 24(시간) * 60(분) * 60(초) * 30(일)
