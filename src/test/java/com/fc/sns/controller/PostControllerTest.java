@@ -3,10 +3,12 @@ package com.fc.sns.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fc.sns.controller.request.PostCreateRequest;
 import com.fc.sns.controller.request.UserJoinRequest;
+import com.fc.sns.service.PostService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -24,6 +26,9 @@ public class PostControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @MockBean
+    private PostService postService; // Controller에서 PostService를 의존주입 받기 때문에 실질적으로 사용하지 않더라도 모킹해줘야한다.
 
     @Test
     @WithMockUser // 인증된 회원
