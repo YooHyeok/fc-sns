@@ -18,7 +18,32 @@ public class Response<T> {
         return new Response<>(errorCode, null);
     }
 
+    /**
+     * 성공시 결과 null 및 단순 성공 문자만 반환하는 Void 형태
+     * @return
+     */
+    public static Response<Void> success() {
+        return new Response<Void>("SUCCESS", null);
+    }
+
+    /**
+     * 성공시 결과와 성공문자를 함께 반환하는 형태
+     * @param result
+     * @return
+     * @param <T>
+     */
     public static <T> Response<T> success(T result) {
         return new Response<>("SUCCESS", result);
+    }
+
+    public String toStream() {
+        if (result == null) {
+            return "{" +
+                    "\"resultCode\":" + "\"" + resultCode + "\"," +
+                    "\"result\":" + "\"" + null + "\"" + "}";
+        }
+        return "{" +
+                "\"resultCode\":" + "\"" + resultCode + "\"," +
+                "\"result\":" + "\"" + result + "\"" + "}";
     }
 }
