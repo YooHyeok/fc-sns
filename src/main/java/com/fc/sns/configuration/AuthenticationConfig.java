@@ -1,17 +1,29 @@
 package com.fc.sns.configuration;
 
+import com.fc.sns.configuration.filter.JwtTokenFilter;
+import com.fc.sns.exception.CustomAuthenticationEntryPoint;
+import com.fc.sns.service.UserService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 /**
  * Security 관련 설정 (인증)
  */
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class AuthenticationConfig extends WebSecurityConfigurerAdapter {
+
+    private final UserService userService;
+
+    @Value("${jwt.secret-key}")
+    private String key;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -23,9 +35,11 @@ public class AuthenticationConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Session을 사용하지 않는 방식 (JWT사용)
                 // TODO - 인증 도중 exception 발생시 지정한 Entrypoint로 매핑
-//                .and()
-//                .exceptionHandling()
-//                .authenticationEntryPoint()
+                .and()
+                .addFilterBefore(new JwtTokenFilter(key, userService), UsernamePasswordAuthenticationFilter.class)
+                /* 에러 발생시 핸들링 */
+                .exceptionHandling()
+                .authenticationEntryPoint(new CustomAuthenticationEntryPoint())
         ;
     }
 }
