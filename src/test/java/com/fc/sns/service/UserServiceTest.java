@@ -36,7 +36,7 @@ class UserServiceTest {
         String userName = "userName";
         String password = "password";
 
-        UserEntity fixture = UserEntityFixture.get(userName, password);
+        UserEntity fixture = UserEntityFixture.get(userName, password, 1);
 
 
         //mocking
@@ -52,7 +52,7 @@ class UserServiceTest {
         String userName = "userName";
         String password = "password";
 
-        UserEntity fixture = UserEntityFixture.get(userName, password);
+        UserEntity fixture = UserEntityFixture.get(userName, password, 1);
 
         //mocking
 //        Mockito.when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.of(Mockito.mock(UserEntity.class)));
@@ -69,7 +69,7 @@ class UserServiceTest {
         String userName = "userName";
         String password = "password";
 
-        UserEntity fixture = UserEntityFixture.get(userName, password);
+        UserEntity fixture = UserEntityFixture.get(userName, password, 1);
 
         //mocking
         Mockito.when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.of(fixture));
@@ -94,7 +94,7 @@ class UserServiceTest {
         String password = "password";
         String wrongPassword = "wrongPassword";
 
-        UserEntity fixture = UserEntityFixture.get(userName, password);
+        UserEntity fixture = UserEntityFixture.get(userName, password, 1);
 
         //mocking
         Mockito.when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.of(fixture));

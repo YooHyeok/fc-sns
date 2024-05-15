@@ -13,9 +13,9 @@ import com.fc.sns.model.entity.UserEntity;
  * 현재의 방식은 별도로 테스트에서 사용하는 객체의 생성을 관리할수 있다.
  */
 public class UserEntityFixture {
-    public static UserEntity get(String userName, String password) {
+    public static UserEntity get(String userName, String password, Integer userId) {
         UserEntity result = new UserEntity();
-        result.setId(1);
+        result.setId(userId);
         result.setUserName(userName);
         result.setPassword(password);
         return result;

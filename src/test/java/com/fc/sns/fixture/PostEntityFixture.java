@@ -14,14 +14,14 @@ import com.fc.sns.model.entity.UserEntity;
  * 현재의 방식은 별도로 테스트에서 사용하는 객체의 생성을 관리할수 있다.
  */
 public class PostEntityFixture {
-    public static PostEntity get(String userName, Integer postId) {
+    public static PostEntity get(String userName, Integer postId, Integer userId) {
         UserEntity user = new UserEntity();
-        user.setId(1);
+        user.setId(userId);
         user.setUserName(userName);
 
         PostEntity result = new PostEntity();
-        result.setId(1);
         result.setUser(user);
+        result.setId(postId);
         return result;
     }
 }
