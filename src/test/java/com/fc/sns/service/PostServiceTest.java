@@ -67,9 +67,11 @@ public class PostServiceTest {
         UserEntity userEntity = postEntity.getUser();
 
         //mocking
-        PostEntity mockPostEntity = Mockito.mock(PostEntity.class);
+//        PostEntity mockPostEntity = Mockito.mock(PostEntity.class);
         Mockito.when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.of(userEntity));
-        Mockito.when(postEntityRepository.findById(postId)).thenReturn(Optional.of(mockPostEntity));
+//        Mockito.when(postEntityRepository.findById(postId)).thenReturn(Optional.of(mockPostEntity));
+        Mockito.when(postEntityRepository.findById(postId)).thenReturn(Optional.of(postEntity)); // Mock대신 Fixture적용
+        Mockito.when(postEntityRepository.saveAndFlush(ArgumentMatchers.any())).thenReturn(postEntity);
 
         Assertions.assertDoesNotThrow(() -> postService.modify(title, body, userName, postId));
     }
