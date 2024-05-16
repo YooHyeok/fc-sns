@@ -6,6 +6,8 @@ import com.fc.sns.controller.request.PostModifyRequest;
 import com.fc.sns.controller.request.UserJoinRequest;
 import com.fc.sns.exception.ErrorCode;
 import com.fc.sns.exception.SnsApplicationException;
+import com.fc.sns.fixture.PostEntityFixture;
+import com.fc.sns.model.Post;
 import com.fc.sns.service.PostService;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
@@ -70,6 +72,10 @@ public class PostControllerTest {
     void 포스트수정() throws Exception{
         String title = "title";
         String body = "body";
+
+        // 반환타입이 Void에서 변경되었으므로 mocking
+        Mockito.when(postService.modify(ArgumentMatchers.eq(title), ArgumentMatchers.eq(body), ArgumentMatchers.any(), ArgumentMatchers.any()))
+                .thenReturn(Post.fromEntity(PostEntityFixture.get("userName", 1, 1)));
 
         //로그인 하지 않은 경우
         mockMvc.perform(
