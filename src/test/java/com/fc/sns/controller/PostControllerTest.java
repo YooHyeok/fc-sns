@@ -45,7 +45,6 @@ public class PostControllerTest {
         mockMvc.perform(
                         MockMvcRequestBuilders.post("/api/v1/posts")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                //TODO : add request body
                                 .content(objectMapper.writeValueAsBytes(new PostCreateRequest(title, body)))
                 ).andDo(MockMvcResultHandlers.print()) // 출력
                 .andExpect(MockMvcResultMatchers.status().isOk()); // 정상 동작
@@ -61,7 +60,6 @@ public class PostControllerTest {
         mockMvc.perform(
                         MockMvcRequestBuilders.post("/api/v1/posts")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                //TODO : add request body
                                 .content(objectMapper.writeValueAsBytes(new PostCreateRequest(title, body)))
                 ).andDo(MockMvcResultHandlers.print()) // 출력
                 .andExpect(MockMvcResultMatchers.status().isUnauthorized()); // 정상 동작
@@ -81,7 +79,6 @@ public class PostControllerTest {
         mockMvc.perform(
                         MockMvcRequestBuilders.put("/api/v1/posts/1")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                //TODO : add request body
                                 .content(objectMapper.writeValueAsBytes(new PostModifyRequest(title, body)))
                 ).andDo(MockMvcResultHandlers.print()) // 출력
                 .andExpect(MockMvcResultMatchers.status().isOk()); // 정상 동작
@@ -97,7 +94,6 @@ public class PostControllerTest {
         mockMvc.perform(
                         MockMvcRequestBuilders.put("/api/v1/posts/1")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                //TODO : add request body
                                 .content(objectMapper.writeValueAsBytes(new PostModifyRequest(title, body)))
                 ).andDo(MockMvcResultHandlers.print()) // 출력
                 .andExpect(MockMvcResultMatchers.status().isUnauthorized());
@@ -141,6 +137,60 @@ public class PostControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 //TODO : add request body
                                 .content(objectMapper.writeValueAsBytes(new PostModifyRequest(title, body)))
+                ).andDo(MockMvcResultHandlers.print()) // 출력
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser
+    void 포스트삭제() throws Exception{
+
+        //로그인 하지 않은 경우
+        mockMvc.perform(
+                        MockMvcRequestBuilders.delete("/api/v1/posts/1")
+                                .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(MockMvcResultHandlers.print()) // 출력
+                .andExpect(MockMvcResultMatchers.status().isOk()); // 정상 동작
+    }
+
+    @Test
+    @WithAnonymousUser
+    void 포스트삭제시_로그인하지_않은경우() throws Exception{
+
+        //로그인 하지 않은 경우
+        mockMvc.perform(
+                        MockMvcRequestBuilders.delete("/api/v1/posts/1")
+                                .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(MockMvcResultHandlers.print()) // 출력
+                .andExpect(MockMvcResultMatchers.status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser
+    void 포스트삭제시_작성자와_삭제요청자가_다를경우() throws Exception{
+
+        // mocking
+        Mockito.doThrow(new SnsApplicationException(ErrorCode.INVALID_PERMISSION)).when(postService).delete(ArgumentMatchers.any(), ArgumentMatchers.any());
+
+        //로그인 하지 않은 경우
+        mockMvc.perform(
+                        MockMvcRequestBuilders.delete("/api/v1/posts/1")
+                                .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(MockMvcResultHandlers.print()) // 출력
+                .andExpect(MockMvcResultMatchers.status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser
+    void 포스트삭제시_삭제하려는_포스트가_존재하지_않을경우() throws Exception{
+
+        // mocking
+        Mockito.doThrow(new SnsApplicationException(ErrorCode.POST_NOT_FOUND)).when(postService).delete(ArgumentMatchers.any(), ArgumentMatchers.any());
+
+        //로그인 하지 않은 경우
+        mockMvc.perform(
+                        MockMvcRequestBuilders.delete("/api/v1/posts/1")
+                                .contentType(MediaType.APPLICATION_JSON)
                 ).andDo(MockMvcResultHandlers.print()) // 출력
                 .andExpect(MockMvcResultMatchers.status().isNotFound());
     }
