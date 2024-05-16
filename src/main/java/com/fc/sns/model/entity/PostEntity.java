@@ -39,7 +39,7 @@ public class PostEntity {
     private Timestamp deletedAt; // 회원 탈퇴시 flag가 아닌 실제 row가 삭제되는 경우 - 의도치 않은 삭제로 cs 문의시 삭제 log등 탐색 편리
 
     @PrePersist
-    void registerdAt() {
+    void registeredAt() {
         this.registeredAt = Timestamp.from(Instant.now());
     }
     @PreUpdate
