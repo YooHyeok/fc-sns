@@ -175,7 +175,11 @@ public class PostServiceTest {
 
         //mocking
         Pageable pageable = Mockito.mock(Pageable.class);
-        Mockito.when(postEntityRepository.findAllByUser(ArgumentMatchers.any(), pageable)).thenReturn(Page.empty());
+//        UserEntity user = Mockito.mock(UserEntity.class);
+        UserEntity user = UserEntityFixture.get(userName, "password", 2);
+
+        Mockito.when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.of(user));
+        Mockito.when(postEntityRepository.findAllByUser(user, pageable)).thenReturn(Page.empty());
         Assertions.assertDoesNotThrow(() -> postService.my(userName, pageable));
     }
 }
