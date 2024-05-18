@@ -2,6 +2,7 @@ package com.fc.sns.controller.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.ToString;
 
 /**
  * 회원가입 Join 파라미터용 요청 객체
@@ -10,7 +11,8 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
+@ToString
 public class UserLoginRequest {
-    private String userName;
+    private String name;
     private String password;
 }
