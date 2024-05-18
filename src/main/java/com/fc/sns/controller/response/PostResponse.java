@@ -1,7 +1,6 @@
 package com.fc.sns.controller.response;
 
 import com.fc.sns.model.Post;
-import com.fc.sns.model.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -14,7 +13,7 @@ public class PostResponse {
 
     private String title;
     private String body;
-    private UserReponse user;
+    private UserResponse user;
     private Timestamp registeredAt;
     private Timestamp updatedAt;
     private Timestamp deletedAt;
@@ -25,7 +24,7 @@ public class PostResponse {
              post.getId(),
              post.getTitle(),
              post.getBody(),
-             UserReponse.fromUser(post.getUser()),
+             UserResponse.fromUser(post.getUser()),
              post.getRegisteredAt(),
              post.getUpdatedAt(),
              post.getDeletedAt()
