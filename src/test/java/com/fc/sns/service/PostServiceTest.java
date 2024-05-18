@@ -15,6 +15,8 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Optional;
 
@@ -30,7 +32,7 @@ public class PostServiceTest {
     private UserEntityRepository userEntityRepository;
 
     @Test
-    void 포스트작성이_성공한경우() throws Exception{
+    void 포스트작성이_성공한경우() throws Exception {
         String title = "title";
         String body = "body";
         String userName = "userName";
@@ -43,7 +45,7 @@ public class PostServiceTest {
     }
 
     @Test
-    void 포스트작성시_요청한유저가_존재하지않는경우() throws Exception{
+    void 포스트작성시_요청한유저가_존재하지않는경우() throws Exception {
         String title = "title";
         String body = "body";
         String userName = "userName";
@@ -57,7 +59,7 @@ public class PostServiceTest {
     }
 
     @Test
-    void 포스트수정이_성공한경우() throws Exception{
+    void 포스트수정이_성공한경우() throws Exception {
         String title = "title";
         String body = "body";
         String userName = "userName";
@@ -77,7 +79,7 @@ public class PostServiceTest {
     }
 
     @Test
-    void 포스트수정시_포스트가_존재하지않는_경우() throws Exception{
+    void 포스트수정시_포스트가_존재하지않는_경우() throws Exception {
         String title = "title";
         String body = "body";
         String userName = "userName";
@@ -95,7 +97,7 @@ public class PostServiceTest {
     }
 
     @Test
-    void 포스트수정시_권한이_없는_경우() throws Exception{
+    void 포스트수정시_권한이_없는_경우() throws Exception {
         String title = "title";
         String body = "body";
         String userName = "userName";
@@ -113,7 +115,7 @@ public class PostServiceTest {
     }
 
     @Test
-    void 포스트삭제가_성공한경우() throws Exception{
+    void 포스트삭제가_성공한경우() throws Exception {
         String userName = "userName";
         Integer postId = 1;
 
@@ -128,7 +130,7 @@ public class PostServiceTest {
     }
 
     @Test
-    void 포스트삭제시_포스트가_존재하지않는_경우() throws Exception{
+    void 포스트삭제시_포스트가_존재하지않는_경우() throws Exception {
         String userName = "userName";
         Integer postId = 1;
 
@@ -144,7 +146,7 @@ public class PostServiceTest {
     }
 
     @Test
-    void 포스트삭제시_권한이_없는_경우() throws Exception{
+    void 포스트삭제시_권한이_없는_경우() throws Exception {
         String userName = "userName";
         Integer postId = 1;
 
@@ -157,5 +159,23 @@ public class PostServiceTest {
 
         SnsApplicationException e = Assertions.assertThrows(SnsApplicationException.class, () -> postService.delete(userName, postId));
         Assertions.assertEquals(ErrorCode.INVALID_PERMISSION, e.getErrorCode());
+    }
+
+    @Test
+    void 피드목록요청이_성공한경우() throws Exception {
+        //mocking
+        Pageable pageable = Mockito.mock(Pageable.class);
+        Mockito.when(postEntityRepository.findAll(pageable)).thenReturn(Page.empty());
+        Assertions.assertDoesNotThrow(() -> postService.list(pageable));
+    }
+
+    @Test
+    void 내피드목록요청이_성공한경우() throws Exception {
+        String userName = "userName";
+
+        //mocking
+        Pageable pageable = Mockito.mock(Pageable.class);
+        Mockito.when(postEntityRepository.findAllByUser(ArgumentMatchers.any(), pageable)).thenReturn(Page.empty());
+        Assertions.assertDoesNotThrow(() -> postService.my(userName, pageable));
     }
 }
