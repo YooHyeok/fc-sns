@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -24,6 +25,19 @@ public class AuthenticationConfig extends WebSecurityConfigurerAdapter {
 
     @Value("${jwt.secret-key}")
     private String key;
+
+    /**
+     * 리소스 인가 처리
+     * SecurityFilterChain의 앞단에서 작동하여 해당 요청 리소스 경로만 보안 검사를 처리하도록 지정한다.
+     * 지정하지 않은 url은 Security의 보안 검사대상에서 제외된다.
+     * ex) /favicon.js 리소스에 대한 요청이 들어올 경우 HttpSercurity를 매개변수로 갖는 configure()에 걸리지 않음
+     * @param web
+     * @throws Exception
+     */
+    @Override
+    public void configure(WebSecurity web) throws Exception {
+        web.ignoring().regexMatchers("^(?!/api/).*");
+    }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
