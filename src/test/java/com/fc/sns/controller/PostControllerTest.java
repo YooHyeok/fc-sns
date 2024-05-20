@@ -247,4 +247,40 @@ public class PostControllerTest {
                 ).andDo(MockMvcResultHandlers.print()) // 출력
                 .andExpect(MockMvcResultMatchers.status().isUnauthorized());
     }
+
+    @Test
+    @WithMockUser
+    void 좋아요기능() throws Exception{
+
+        mockMvc.perform(
+                        MockMvcRequestBuilders.post("/api/v1/posts/1/likes")
+                                .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(MockMvcResultHandlers.print()) // 출력
+                .andExpect(MockMvcResultMatchers.status().isOk()); // 정상 동작
+    }
+
+    @Test
+    @WithAnonymousUser
+    void 좋아요버튼클릭시시_로그인하지_않은경우() throws Exception {
+
+        //로그인 하지 않은 경우
+        mockMvc.perform(
+                        MockMvcRequestBuilders.post("/api/v1/posts/1/likes")
+                                .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(MockMvcResultHandlers.print()) // 출력
+                .andExpect(MockMvcResultMatchers.status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser
+    void 좋아요버튼클릭시시_게시물이_없는은경우() throws Exception {
+        Mockito.doThrow(new SnsApplicationException(ErrorCode.POST_NOT_FOUND)).when(postService).like(ArgumentMatchers.any(), ArgumentMatchers.any());
+
+        //로그인 하지 않은 경우
+        mockMvc.perform(
+                        MockMvcRequestBuilders.post("/api/v1/posts/1/likes")
+                                .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(MockMvcResultHandlers.print()) // 출력
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
 }
