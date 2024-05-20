@@ -35,18 +35,30 @@ public class WebConfiguration implements WebMvcConfigurer {
         private List<String> staticExtension = Arrays.asList("png", "jpg", "io", "json", "js", "html");
 
         private Resource resolve(String requestPath) {
-            log.info(requestPath);
             if (requestPath == null) {
                 return null;
             }
 
-            if (staticExtension.contains(requestPath)
+            /*if (staticExtension.contains(requestPath)
                     || requestPath.startsWith(REACT_STATIC_DIR)) {
                 return new ClassPathResource(REACT_DIR + requestPath);
             } else {
                 return index;
-            }
+            }*/
 
+            /**
+             * 어떤 경로 요청이 들어오든지 간에 (예: /authentication) /static 디렉토리에서 리소스를 탐색해야한다.
+             */
+            for (String extension : staticExtension) {
+                if (requestPath.endsWith("." + extension)) {
+                    String adjustedPath = requestPath.startsWith("authentication/") ? requestPath.substring("authentication/".length()) : requestPath;
+                    Resource resource = new ClassPathResource(REACT_DIR + adjustedPath);
+                    if (resource.exists() && resource.isReadable()) {
+                        return resource;
+                    }
+                }
+            }
+            return index;
         }
 
         @Override
