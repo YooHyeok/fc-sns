@@ -116,4 +116,8 @@ public class PostService {
 //        return likeEntityRepository.findAllByPost(postEntity).size();
         return likeEntityRepository.countByPost(postEntity);
     }
+
+    @Transactional
+    public void comment(Integer postId, String userName) {
+    }
 }
