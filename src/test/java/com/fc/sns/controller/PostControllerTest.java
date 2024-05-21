@@ -1,6 +1,7 @@
 package com.fc.sns.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fc.sns.controller.request.PostCommentRequest;
 import com.fc.sns.controller.request.PostCreateRequest;
 import com.fc.sns.controller.request.PostModifyRequest;
 import com.fc.sns.controller.request.UserJoinRequest;
@@ -133,8 +134,7 @@ public class PostControllerTest {
         mockMvc.perform(
                         MockMvcRequestBuilders.put("/api/v1/posts/1")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                //TODO : add request body
-                                .content(objectMapper.writeValueAsBytes(new PostModifyRequest(title, body)))
+                                .content(objectMapper.writeValueAsBytes(new PostModifyRequest(title, body)))//add request body
                 ).andDo(MockMvcResultHandlers.print()) // 출력
                 .andExpect(MockMvcResultMatchers.status().isNotFound());
     }
@@ -261,7 +261,7 @@ public class PostControllerTest {
 
     @Test
     @WithAnonymousUser
-    void 좋아요버튼클릭시시_로그인하지_않은경우() throws Exception {
+    void 좋아요버튼클릭시_로그인하지_않은경우() throws Exception {
 
         //로그인 하지 않은 경우
         mockMvc.perform(
@@ -273,13 +273,52 @@ public class PostControllerTest {
 
     @Test
     @WithMockUser
-    void 좋아요버튼클릭시시_게시물이_없는은경우() throws Exception {
+    void 좋아요버튼클릭시_게시물이_없는경우() throws Exception {
         Mockito.doThrow(new SnsApplicationException(ErrorCode.POST_NOT_FOUND)).when(postService).like(ArgumentMatchers.any(), ArgumentMatchers.any());
 
         //로그인 하지 않은 경우
         mockMvc.perform(
                         MockMvcRequestBuilders.post("/api/v1/posts/1/likes")
                                 .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(MockMvcResultHandlers.print()) // 출력
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser
+    void 댓글기능() throws Exception{
+
+        mockMvc.perform(
+                        MockMvcRequestBuilders.post("/api/v1/posts/1/comments")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsBytes(new PostCommentRequest("comment")))//add request body
+                ).andDo(MockMvcResultHandlers.print()) // 출력
+                .andExpect(MockMvcResultMatchers.status().isOk()); // 정상 동작
+    }
+
+    @Test
+    @WithAnonymousUser
+    void 댓글작성시_로그인하지_않은경우() throws Exception {
+
+        //로그인 하지 않은 경우
+        mockMvc.perform(
+                        MockMvcRequestBuilders.post("/api/v1/posts/1/comments")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsBytes(new PostCommentRequest("comment")))//add request body
+                ).andDo(MockMvcResultHandlers.print()) // 출력
+                .andExpect(MockMvcResultMatchers.status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser
+    void 댓글작성시_게시물이_없는경우() throws Exception {
+        Mockito.doThrow(new SnsApplicationException(ErrorCode.POST_NOT_FOUND)).when(postService).comment(ArgumentMatchers.any(), ArgumentMatchers.any());
+
+        //로그인 하지 않은 경우
+        mockMvc.perform(
+                        MockMvcRequestBuilders.post("/api/v1/posts/1/comments")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsBytes(new PostCommentRequest("comment")))//add request body
                 ).andDo(MockMvcResultHandlers.print()) // 출력
                 .andExpect(MockMvcResultMatchers.status().isNotFound());
     }
