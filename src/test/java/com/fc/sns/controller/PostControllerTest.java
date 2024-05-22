@@ -312,7 +312,7 @@ public class PostControllerTest {
     @Test
     @WithMockUser
     void 댓글작성시_게시물이_없는경우() throws Exception {
-        Mockito.doThrow(new SnsApplicationException(ErrorCode.POST_NOT_FOUND)).when(postService).comment(ArgumentMatchers.any(), ArgumentMatchers.any());
+        Mockito.doThrow(new SnsApplicationException(ErrorCode.POST_NOT_FOUND)).when(postService).comment(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any());
 
         //로그인 하지 않은 경우
         mockMvc.perform(
