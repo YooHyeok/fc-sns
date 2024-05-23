@@ -8,12 +8,16 @@ import com.fc.sns.exception.SnsApplicationException;
 import com.fc.sns.model.User;
 import com.fc.sns.service.UserService;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithAnonymousUser;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
@@ -110,5 +114,25 @@ public class UserControllerTest {
                                 .content(objectMapper.writeValueAsBytes(new UserLoginRequest(userName, password)))
                 ).andDo(MockMvcResultHandlers.print()) // 출력
                 .andExpect(MockMvcResultMatchers.status().isUnauthorized()); // invalid한 패스워드를 반환하였으므로, 인증되지않은 isUnauthorized
+    }
+
+    @Test
+    @WithMockUser
+    public void 알림기능() throws Exception {
+        Mockito.when(userService.alarmList(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(Page.empty());
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/users/alarm")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @Test
+    @WithAnonymousUser
+    public void 알림리스트요청시_로그인하지_않은경우() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/users/alarm")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isUnauthorized());
     }
 }
