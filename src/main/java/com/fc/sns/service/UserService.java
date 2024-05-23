@@ -8,6 +8,8 @@ import com.fc.sns.repository.UserEntityRepository;
 import com.fc.sns.util.JwtTokenUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -62,5 +64,9 @@ public class UserService {
         // 토큰 생성
         String token = JwtTokenUtils.generateToken(userName, secretKey, expiredTimeMs);
         return token;
+    }
+
+    public Page<Void> alarmList(String userName, Pageable pageable) {
+        return Page.empty();
     }
 }
