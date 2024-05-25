@@ -12,7 +12,7 @@ import java.time.Instant;
 @Setter
 @Getter
 @Entity
-@Table(name = "\"post\"") // postgreSQL은 User 테이블이 기본적으로 이미 존재하기 떄문에 ""를 붙혀야 User라는 이름으로 테이블 사용이 가능하다
+@Table(name = "\"like\"") // postgreSQL은 User 테이블이 기본적으로 이미 존재하기 떄문에 ""를 붙혀야 User라는 이름으로 테이블 사용이 가능하다
 @SQLDelete(sql = "UPDATE \"like\" SET deleted_at = NOW() where id = ?") // 삭제시 삭제전 발생
 @Where(clause = "deleted_at is NULL") // SELECT시 deleted_at이 null인 경우만 조회되도록 where 절 추가
 public class LikeEntity {
