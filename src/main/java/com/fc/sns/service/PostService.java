@@ -2,16 +2,12 @@ package com.fc.sns.service;
 
 import com.fc.sns.exception.ErrorCode;
 import com.fc.sns.exception.SnsApplicationException;
+import com.fc.sns.model.AlarmArgs;
+import com.fc.sns.model.AlarmType;
 import com.fc.sns.model.Comment;
 import com.fc.sns.model.Post;
-import com.fc.sns.model.entity.CommentEntity;
-import com.fc.sns.model.entity.LikeEntity;
-import com.fc.sns.model.entity.PostEntity;
-import com.fc.sns.model.entity.UserEntity;
-import com.fc.sns.repository.CommentEntityRepository;
-import com.fc.sns.repository.LikeEntityRepository;
-import com.fc.sns.repository.PostEntityRepository;
-import com.fc.sns.repository.UserEntityRepository;
+import com.fc.sns.model.entity.*;
+import com.fc.sns.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +22,7 @@ public class PostService {
     private final UserEntityRepository userEntityRepository;
     private final LikeEntityRepository likeEntityRepository;
     private final CommentEntityRepository commentEntityRepository;
+    private final AlarmEntityRepository alarmEntityRepository;
 
     @Transactional
     public void create(String title, String body, String userName) {
@@ -100,6 +97,14 @@ public class PostService {
         });
 
         likeEntityRepository.save(LikeEntity.of(userEntity, postEntity));
+
+        alarmEntityRepository.save(
+                AlarmEntity.of(
+                        postEntity.getUser(), // post 작성자 (알람 수신 대상자)
+                        AlarmType.NEW_LIKE_ON_POST, //알람 타입
+                        new AlarmArgs(userEntity.getId(), postEntity.getId()) // 알람 고유정보 - comment 작성자, 게시글 번호
+                )
+        );
     }
 
     public Integer likeCount(Integer postId) {
@@ -113,6 +118,13 @@ public class PostService {
         PostEntity postEntity = getPostOrException(postId);
 
         commentEntityRepository.save(CommentEntity.of(userEntity, postEntity, comment));
+        alarmEntityRepository.save(
+                AlarmEntity.of(
+                        postEntity.getUser(), // post 작성자 (알람 수신 대상자)
+                        AlarmType.NEW_COMMENT_ON_POST, //알람 타입
+                        new AlarmArgs(userEntity.getId(), postEntity.getId()) // 알람 고유정보 - comment 작성자, 게시글 번호
+                )
+        );
 
     }
     public Page<Comment> getComments(Integer postId, Pageable pageable) {
