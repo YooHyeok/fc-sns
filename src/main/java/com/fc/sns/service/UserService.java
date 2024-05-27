@@ -74,6 +74,25 @@ public class UserService {
     public Page<Alarm> alarmList(String userName, Pageable pageable) {
         UserEntity userEntity = userEntityRepository.findByUserName(userName)
                 .orElseThrow(() -> new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not founded", userName)));
-        return alarmEntityRepository.findAllByUser(userEntity, pageable).map(Alarm::fromEntity);
+        return alarmEntityRepository.findAllByUser(userEntity, pageable)
+                .map(Alarm::fromEntity);
+    }
+
+    /**
+     * 이전에 사용하던 방식은 UserEntity를 직접 조회하여 데이터가 orElseThrow를 발생시켰다.
+     * 이 대신 getId(One,referencedById)를 통해 프록시객체를 가져오고, try~catch구문으로 감싼뒤
+     * 데이터를 실제 사용할때 Exception을 catch하여 Error를 출력하도록 리팩토링 할 수도 있지만,
+     * 현재 컨트롤러로 부터 Authentication객체의 principal를 통해 User객체를 넘겨받도록 하였다.
+     * 이 작업을 통해 굳이 User를 조회하지 않아도 되고, 또한 AlarmEntity의 연관 엔티티인 UserEntity에 대한
+     * Lazy 패치전략 적용이 가능해진다. (@EntityGraph를 사용하는 불필요한 Fetch를 하지 않아도 됨)
+     * (pricipal로 가져온 User객체를 넘겨주면 되므로 다른 엔티티에서는 따로 엔티티 조회가 필요하긴 함.)
+     * @param user
+     * @param pageable
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public Page<Alarm> alarmListRefact(User user, Pageable pageable) {
+        return alarmEntityRepository.findAllByUserId(user.getId(), pageable)
+                .map((alarmEntity) -> Alarm.fromEntityRefact(alarmEntity, user));
     }
 }
