@@ -30,4 +30,16 @@ public class Alarm {
         );
     }
 
+    public static Alarm fromEntityRefact(AlarmEntity alarmEntity, User user) {
+        return new Alarm(
+                alarmEntity.getId(),
+                user,
+                alarmEntity.getAlarmType(),
+                alarmEntity.getAlarmArgs(),
+                alarmEntity.getRegisteredAt(),
+                alarmEntity.getUpdatedAt(),
+                alarmEntity.getDeletedAt()
+        );
+    }
+
 }
