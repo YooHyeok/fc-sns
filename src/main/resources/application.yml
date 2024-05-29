@@ -18,6 +18,9 @@ spring:
     database-platform: postgres
     driver-class-name: org.postgresql.Driver
 
+  redis:
+    url: redis://localhost:6379
+
 jwt:
   secret-key: fc.sns-application-2024.secret_key
   token:
