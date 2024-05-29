@@ -8,9 +8,11 @@ import com.fc.sns.model.entity.AlarmEntity;
 import com.fc.sns.model.entity.LikeEntity;
 import com.fc.sns.model.entity.UserEntity;
 import com.fc.sns.repository.AlarmEntityRepository;
+import com.fc.sns.repository.UserCacheRepository;
 import com.fc.sns.repository.UserEntityRepository;
 import com.fc.sns.util.JwtTokenUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +21,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -26,6 +29,8 @@ public class UserService {
     private final UserEntityRepository userEntityRepository;
     private final AlarmEntityRepository alarmEntityRepository;
     private final BCryptPasswordEncoder encoder;
+    private final UserCacheRepository userCacheRepository;
+
 
     @Value("${jwt.secret-key}")
     private String secretKey;
@@ -34,9 +39,17 @@ public class UserService {
     private Long expiredTimeMs;
 
     public User loadByUsername(String userName) {
-        return userEntityRepository.findByUserName(userName)
+        /* 캐싱된 Redis 조회 적용 */
+        return userCacheRepository.getUser(userName)
+                .orElseGet(() ->
+                        userEntityRepository.findByUserName(userName)
+                            .map(User::fromEntity)
+                            .orElseThrow(() -> new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not founded", userName))
+                        )
+                );
+        /*return userEntityRepository.findByUserName(userName)
                 .map(User::fromEntity)
-                .orElseThrow(() -> new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not founded", userName)));
+                .orElseThrow(() -> new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not founded", userName)));*/
     }
 
     @Transactional
@@ -53,15 +66,15 @@ public class UserService {
         return User.fromEntity(savedUser);
     }
 
-    // TODO: implement
     public String login(String userName, String password) {
-        // 회원가입 여부 체크
-        UserEntity userEntity = userEntityRepository.findByUserName(userName)
-                .orElseThrow(() -> new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not founded", userName)));
+
+        // 회원가입 여부 체크 (Redis에 캐싱 저장 처리)
+        User user = loadByUsername(userName);
+        log.info("userService-join => {}", user.getUsername());
+        userCacheRepository.setUser(user);
 
         // 비밀번호 체크
-//        if(!userEntity.getPassword().equals(password)) {
-        if(!encoder.matches(password, userEntity.getPassword())) { // 평문, 암호문 비교 - 일치하지 않으면 exception
+        if(!encoder.matches(password, user.getPassword())) { // 평문, 암호문 비교 - 일치하지 않으면 exception
             throw new SnsApplicationException(ErrorCode.INVALID_PASSWORD);
         }
         
