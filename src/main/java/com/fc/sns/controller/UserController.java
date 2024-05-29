@@ -51,4 +51,11 @@ public class UserController {
         return Response.success(userService.alarmListRefact(user, pageable).map(AlarmResponse::fromAlarm));
     }
 
+    @GetMapping("/alarm/subscribe")
+    public SseEmitter subscribe(Authentication authentication) {
+        log.info("subscribe");
+        User user = ClassUtils.getSafeCastInstance(authentication.getPrincipal(), User.class)
+                .orElseThrow(() -> new SnsApplicationException(ErrorCode.INTERNAL_SERVER_ERROR, String.format("Casting To User class failed")));
+        return alarmService.connectNotification(user.getId());
+    }
 }
