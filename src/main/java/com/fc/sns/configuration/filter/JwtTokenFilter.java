@@ -28,6 +28,8 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     private final String key;
     private final UserService userService;
 
+    private final static List<String> TOKEN_IN_PARAM_URLS = List.of("/api/v1/users/alarm/subscribe");
+
     /**
      * 요청이 들어올 때 Request 객체를 가지고 인증을 수행할 수 있는 작업이 가능해짐.
      * 로그인 할 때 토큰값을 Response로 반환한다.
@@ -40,19 +42,26 @@ public class JwtTokenFilter extends OncePerRequestFilter {
      */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        // get Header
-        final String header = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (header == null || !header.startsWith("Bearer ")) {
-            log.error("Error occurs while getting header. header is null or invalid {}", request.getRequestURL());
-            filterChain.doFilter(request, response);
-            return;
-        }
+
 
         try {
-            final String token = header.split(" ")[1].trim();
+            final String token;
+            if (TOKEN_IN_PARAM_URLS.contains(request.getRequestURI())) {
+                log.info("Request with {} check the query param", request.getRequestURL());
+                token = request.getQueryString().split("=")[1].trim();
+            } else {
+                // get Header
+                final String header = request.getHeader(HttpHeaders.AUTHORIZATION);
+                if (header == null || !header.startsWith("Bearer ")) {
+                    log.error("Error occurs while getting header. header is null or invalid {}", request.getRequestURL());
+                    filterChain.doFilter(request, response);
+                    return;
+                }
+                token = header.split(" ")[1].trim();
+            }
+
 
             /* 토큰 유효 검증 */
-            // TODO: check token is valid
             if (JwtTokenUtils.isExpired(token, key)) {
                 log.error("Key is expired");
                 filterChain.doFilter(request, response);
@@ -60,13 +69,12 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             }
 
             /* 토큰으로 부터 username 획득 */
-            // TODO: get userName from token
             String userName = JwtTokenUtils.getUserName(token, key);
 
             /* username을 통해 회원 엔티티 조회 */
-            // TODO: check the userName is valid
+            log.info("jwtTokenFilter - loadByUsername 호출");
             User user = userService.loadByUsername(userName);
-
+            log.info("jwtTokenFilter - loadByUsername 호출 종료");
             /* 회원 정보와 Role 각각 Security의 Pirncipal과 Authorities에 저장 */
             UsernamePasswordAuthenticationToken authenticationToken =
                     new UsernamePasswordAuthenticationToken(
