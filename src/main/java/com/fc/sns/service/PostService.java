@@ -7,8 +7,11 @@ import com.fc.sns.model.AlarmType;
 import com.fc.sns.model.Comment;
 import com.fc.sns.model.Post;
 import com.fc.sns.model.entity.*;
+import com.fc.sns.model.event.AlarmEvent;
+import com.fc.sns.producer.AlarmProducer;
 import com.fc.sns.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.apache.kafka.clients.producer.KafkaProducer;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -24,6 +27,8 @@ public class PostService {
     private final CommentEntityRepository commentEntityRepository;
     private final AlarmEntityRepository alarmEntityRepository;
     private final AlarmService alarmService;
+    private final AlarmProducer alarmProducer;
+
 
     @Transactional
     public void create(String title, String body, String userName) {
@@ -101,14 +106,24 @@ public class PostService {
 
         likeEntityRepository.save(LikeEntity.of(userEntity, postEntity));
 
-        AlarmEntity alarmEntity = alarmEntityRepository.save(
+        /* SSE - Kafka 적용 */
+        alarmProducer.send(
+                new AlarmEvent(
+                        postEntity.getUser().getId(),
+                        AlarmType.NEW_LIKE_ON_POST,
+                        new AlarmArgs(userEntity.getId(), postEntity.getId())
+                )
+        );
+
+        /* SSE 적용 */
+        /*AlarmEntity alarmEntity = alarmEntityRepository.save(
                 AlarmEntity.of(
                         postEntity.getUser(), // post 작성자 (알람 수신 대상자)
                         AlarmType.NEW_LIKE_ON_POST, //알람 타입
                         new AlarmArgs(userEntity.getId(), postEntity.getId()) // 알람 고유정보 - comment 작성자, 게시글 번호
                 )
         );
-        alarmService.send(alarmEntity.getId(), postEntity.getUser().getId());
+        alarmService.send(alarmEntity.getId(), postEntity.getUser().getId());*/
     }
 
     public Integer likeCount(Integer postId) {
@@ -123,14 +138,24 @@ public class PostService {
 
         commentEntityRepository.save(CommentEntity.of(userEntity, postEntity, comment));
 
-        AlarmEntity alarmEntity = alarmEntityRepository.save(
+        /* SSE - Kafka 적용 */
+        alarmProducer.send(
+                new AlarmEvent(
+                        postEntity.getUser().getId(),
+                        AlarmType.NEW_COMMENT_ON_POST,
+                        new AlarmArgs(userEntity.getId(), postEntity.getId())
+                )
+        );
+
+        /* SSE 적용 */
+        /*AlarmEntity alarmEntity = alarmEntityRepository.save(
                 AlarmEntity.of(
                         postEntity.getUser(), // post 작성자 (알람 수신 대상자)
                         AlarmType.NEW_COMMENT_ON_POST, //알람 타입
                         new AlarmArgs(userEntity.getId(), postEntity.getId()) // 알람 고유정보 - comment 작성자, 게시글 번호
                 )
         );
-        alarmService.send(alarmEntity.getId(), postEntity.getUser().getId());
+        alarmService.send(alarmEntity.getId(), postEntity.getUser().getId());*/
 
     }
     public Page<Comment> getComments(Integer postId, Pageable pageable) {
