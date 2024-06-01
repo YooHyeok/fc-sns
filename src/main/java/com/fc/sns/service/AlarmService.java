@@ -2,7 +2,15 @@ package com.fc.sns.service;
 
 import com.fc.sns.exception.ErrorCode;
 import com.fc.sns.exception.SnsApplicationException;
+import com.fc.sns.model.AlarmArgs;
+import com.fc.sns.model.AlarmType;
+import com.fc.sns.model.entity.AlarmEntity;
+import com.fc.sns.model.entity.PostEntity;
+import com.fc.sns.model.entity.UserEntity;
+import com.fc.sns.repository.AlarmEntityRepository;
 import com.fc.sns.repository.EmitterRepository;
+import com.fc.sns.repository.PostEntityRepository;
+import com.fc.sns.repository.UserEntityRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,6 +27,11 @@ public class AlarmService {
     private final static String ALARM_NAME = "alarm";
     private final EmitterRepository emitterRepository;
 
+    private final AlarmEntityRepository alarmEntityRepository;
+    private final UserEntityRepository userEntityRepository;
+    private final PostEntityRepository postEntityRepository;
+
+
     /**
      * Map으로부터 알람 수신 회원 Id로 Emitter를 반환받는다. <br/>
      * (이때 해당 수신자가 접속을 종료했을 경우 onCompletion 콜백에 의해 지워지므로 Optional로 null값을 반환받는다.) <br/>
@@ -28,6 +41,7 @@ public class AlarmService {
      * @param userId 알람을 받을 글 작성자
      */
     public void send(Integer alarmId, Integer userId) {
+
         emitterRepository.get(userId).ifPresentOrElse(sseEmitter -> {
             try {
                 sseEmitter.send(
@@ -38,6 +52,38 @@ public class AlarmService {
                 );
             } catch (IOException e) {
                 emitterRepository.delete(userId);
+                throw new SnsApplicationException(ErrorCode.ALARM_CONNECT_ERROR);
+            }
+        }, () -> log.info("No emitter founded"));
+
+    }
+
+    public void send(AlarmType alarmType, AlarmArgs alarmArgs, Integer receiverUserId) {
+/*        UserEntity userEntity = userEntityRepository.findById(receiverUserId)
+                .orElseThrow(() -> new SnsApplicationException(ErrorCode.USER_NOT_FOUND));*/
+        // UserEntity 대신 PostEntity 재조회 : save() 이후 찰라의 순간 글이 삭제될 수도 있기 때문 더 효율적인 조회
+        PostEntity postEntity = postEntityRepository.findById(receiverUserId)
+                .orElseThrow(() -> new SnsApplicationException(ErrorCode.POST_NOT_FOUND, String.format("%s not founded", receiverUserId)));
+        AlarmEntity alarmEntity = alarmEntityRepository.save(
+                AlarmEntity.of(
+//                        userEntity, // post 작성자 (알람 수신 대상자)
+                        postEntity.getUser(), // post 작성자 (알람 수신 대상자)
+                        alarmType, //알람 타입
+                        alarmArgs // 알람 고유정보 - comment 작성자, 게시글 번호
+                )
+        );
+//        emitterRepository.get(userEntity.getId()).ifPresentOrElse(sseEmitter -> {
+        emitterRepository.get(postEntity.getUser().getId()).ifPresentOrElse(sseEmitter -> {
+            try {
+                sseEmitter.send(
+                        SseEmitter.event()
+                                .id(alarmEntity.getId().toString())
+                                .name(ALARM_NAME)
+                                .data("new alarm")
+                );
+            } catch (IOException e) {
+//                emitterRepository.delete(userEntity.getId());
+                emitterRepository.delete(postEntity.getUser().getId());
                 throw new SnsApplicationException(ErrorCode.ALARM_CONNECT_ERROR);
             }
         }, () -> log.info("No emitter founded"));
