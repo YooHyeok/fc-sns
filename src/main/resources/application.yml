@@ -1,4 +1,5 @@
 spring:
+
   jpa:
     database: postgresql
     hibernate:
@@ -20,6 +21,32 @@ spring:
 
   redis:
     url: redis://localhost:6379
+
+  kafka:
+# --- cloud karafka에 대한 설정 --- #
+#    properties:
+#      security.protocol: SASL_SSL
+#      sasl.mechanism: SCRAM-SHA-256
+#      sasl.jaas.config: org.apache.kafka.common.security.scram.ScramLoginModule required username="" password="";
+    consumer:
+      properties:
+        spring.json.trusted.packages: "*" # JSON 변환시 Trust(허용) 할 패키지
+      bootstrap-servers: localhost:9092 # kafka 주소
+      group-id: alarm
+      auto-offset-reset: latest
+      key-deserializer: org.apache.kafka.common.serialization.IntegerDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+    listener:
+      ack-mode: MANUAL
+    producer:
+# --- cloud karafka에 대한 설정 --- #
+#      properties:
+#        enable.idempotence: false
+      bootstrap-servers: localhost:9092 # kafka 주소
+      key-serializer: org.apache.kafka.common.serialization.IntegerSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    topic:
+      alarm: alarm # cloud karafka의 경우 username이 prefix로 붙게됨 {username}-{topic명}
 
 jwt:
   secret-key: fc.sns-application-2024.secret_key
