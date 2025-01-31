@@ -1,4 +1,4 @@
-package com.fc.sns.producer;
+package com.fc.sns.kafka.producer;
 
 import com.fc.sns.model.entity.UserEntity;
 import com.fc.sns.model.event.AlarmEvent;

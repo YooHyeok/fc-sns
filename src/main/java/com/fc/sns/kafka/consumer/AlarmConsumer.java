@@ -1,4 +1,4 @@
-package com.fc.sns.consumer;
+package com.fc.sns.kafka.consumer;
 
 import com.fc.sns.model.entity.PostEntity;
 import com.fc.sns.model.entity.UserEntity;
